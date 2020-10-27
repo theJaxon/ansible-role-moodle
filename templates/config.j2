@@ -1,0 +1,27 @@
+<?php  // Moodle configuration file
+
+unset($CFG);
+global $CFG;
+$CFG = new stdClass();
+
+$CFG->dbtype    = '{{ moodle_db_type }}';
+$CFG->dblibrary = 'native';
+$CFG->dbhost    = '{{ moodle_db_host }}';
+$CFG->dbname    = '{{ db_name }}';
+$CFG->dbuser    = '{{ db_username }}';
+$CFG->dbpass    = '{{ db_user_password }}';
+$CFG->prefix    = 'mdl_';
+$CFG->dboptions = array (
+  'dbpersist' => 0,
+  'dbport' => {{ db_port }},
+  'dbsocket' => '{{ db_socket }}',
+  'dbcollation' => 'utf8mb4_general_ci',
+);
+
+$CFG->wwwroot   = '{{ moodle_domain }}';
+$CFG->dataroot  = '{{ moodle_data_dir }}';
+$CFG->admin     = 'admin';
+
+$CFG->directorypermissions = 0777;
+
+require_once(__DIR__ . '/lib/setup.php');

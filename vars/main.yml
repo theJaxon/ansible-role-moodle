@@ -1,0 +1,47 @@
+---
+# vars file for moodle
+moodle_tar_url: https://download.moodle.org/download.php/direct/stable39/moodle-latest-39.tgz
+moodle_tar_file: moodle-latest-39.tgz
+moodle_dir: /var/moodle
+moodle_cron_dir: /var/www/html/admin/cli
+apache_dir: /var/www/html
+
+php_extensions:
+  - mysql 
+  - xml 
+  - xmlrpc # The XMLRPC extension is useful for web services and Moodle networking.
+  - mbstring # Non-latin language support
+  - intl # intl extension is required to improve internationalization support, such as locale aware sorting and international domain names
+  - curl # The cURL PHP extension is now required by Moodle, in order to communicate with Moodle repositories.
+  - zip # The Zip PHP extension is now required by Moodle, info-ZIP binaries or PclZip library are not used anymore.
+  - gd # Required by moodle for image conversion
+  - soap # Installing the optional SOAP extension is useful for web services and some plugins.
+
+required_packages:
+  - php7.2
+  - mysql-server
+  - apache2 
+
+
+
+# MySQL Configuration 
+db_name: moodle_db
+db_username: moodle 
+db_user_password: strong-pass # TODO use ansible vault
+db_port: 3306
+db_socket: /var/run/mysqld/mysqld.sock
+
+# Moodle Configuration 
+moodle_db_type: mysqli
+moodle_db_host: localhost
+moodle_username: moodle 
+moodle_password: Strong-pass1 # TODO use ansible vault
+moodle_domain: http://192.168.100.200 # TODO Correct the domain name
+moodle_first_name: admin 
+moodle_surname: admin  
+moodle_email: moodle@example.com
+moodle_email_visibility: hidden
+moodle_full_site_name: test 
+moodle_short_site_name: test 
+moodle_noreply_address: noreply@example.com
+moodle_data_dir: /var/www/moodledata

@@ -1,0 +1,81 @@
+---
+# tasks file for moodle
+- name: Install required packages 
+  apt:
+    name: "{{ required_packages }}"
+    state: present
+
+- name: Install required pip packages 
+  pip:
+    name: PyMySQL
+    state: latest
+
+- name: Install required PHP extensions 
+  apt:
+    name: "php-{{ item }}"
+    state: latest 
+  loop: "{{ php_extensions }}"
+
+- name: Remove index.html file 
+  file:
+    state: absent 
+    path: /var/www/html/index.html
+
+- name: Allow apache user to write to /var/www 
+  acl:
+    path: /var/www 
+    entity: www-data
+    etype: user 
+    permissions: rwx
+    recursive: True
+    default: True  
+    state: present  
+
+- name: Check if moodle exists
+  stat:
+    path: "{{ moodle_dir }}"
+  register: moodle_dir_var
+
+- name: Create moodle dir and download moodle if it doesn't exist 
+  block:
+  - name: Create moodle directory
+    file:
+      path: "{{ moodle_dir }}"
+      state: directory 
+  - name: Download moodle 
+    get_url:
+      url: "{{ moodle_tar_url }}"
+      dest: "{{ moodle_dir }}"
+  when: not moodle_dir_var.stat.exists
+
+- name: Extract moodle tar file 
+  unarchive:
+    src: "{{ moodle_dir }}/{{ moodle_tar_file}}"
+    dest: "/var/www/html"
+    extra_opts: [--strip-components=1] # Extract without the parent directory
+    remote_src: True 
+
+- name: Create new Database 
+  mysql_db:
+    login_unix_socket: "{{ db_socket }}" # https://stackoverflow.com/questions/44614863/ansible-unable-to-find-my-cnf-cant-connect-to-local-mysql-server
+    name: "{{ db_name }}"
+  tags: mysql 
+
+- name: Create moodle database user with all privileges
+  mysql_user:
+    name: "{{ db_username }}"
+    password: "{{ db_user_password }}"
+    priv: '*.*:ALL'
+    login_unix_socket: "{{ db_socket }}"
+    state: present
+  tags: mysql 
+
+- name: Place moodle config file in /var/www/html
+  template:
+    src: config.j2 
+    dest: "{{ apache_dir }}/config.php"
+
+- name: run cron.php every minute 
+  cron: 
+    name: "run /var/www/html/admin/cli/cron.php every minute"
+    job: "php {{ moodle_cron_dir }}/cron.php"
